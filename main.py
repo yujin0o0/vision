@@ -12,8 +12,8 @@ top_text = st.text_input("상단 문구", "이게 웃긴다고?")
 bottom_text = st.text_input("하단 문구", "진짜? 😂")
 uploaded_image = st.file_uploader("짤로 쓸 이미지를 업로드하거나 기본 이미지 사용", type=["jpg", "jpeg", "png"])
 
-DEFAULT_IMAGE_PATH = "sample_meme.jpg"
-FONT_PATH = "NanumGothicBold.ttf"  # 폰트 파일이 프로젝트 루트에 있어야 함
+FONT_PATH = "NanumGothicBold.ttf"
+font = ImageFont.truetype(FONT_PATH, font_size)
 
 # 디버그용: 현재 디렉터리와 파일 목록 출력
 st.write("📁 현재 디렉터리:", os.getcwd())
