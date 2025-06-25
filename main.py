@@ -7,19 +7,21 @@ st.set_page_config(page_title="밈 생성기", page_icon="😂")
 
 st.title("😂 나만의 밈 생성기")
 st.markdown("문구를 입력하고 이미지를 선택해 나만의 짤을 만들어보세요!")
-st.write("📄 현재 폴더 파일 목록:", os.listdir("."))
 
+# 사용자 입력
 top_text = st.text_input("상단 문구", "이게 웃긴다고?")
 bottom_text = st.text_input("하단 문구", "진짜? 😂")
 uploaded_image = st.file_uploader("짤로 쓸 이미지를 업로드하거나 기본 이미지 사용", type=["jpg", "jpeg", "png"])
 
-FONT_PATH = "NanumGothicBold.ttf"
-font = ImageFont.truetype(FONT_PATH, font_size)
+# 파일 경로
+DEFAULT_IMAGE_PATH = "sample_meme.jpg"
+FONT_PATH = "NanumGothicBold.ttf"  # 반드시 GitHub 루트에 업로드되어 있어야 함
 
-# 디버그용: 현재 디렉터리와 파일 목록 출력
+# 디버그용 출력
 st.write("📁 현재 디렉터리:", os.getcwd())
-st.write("📄 파일 목록:", os.listdir("."))
+st.write("📄 폴더 내 파일 목록:", os.listdir("."))
 
+# 기본 이미지 불러오기
 @st.cache_data
 def load_default_image():
     try:
@@ -28,6 +30,7 @@ def load_default_image():
         st.error("❗ 기본 이미지(sample_meme.jpg)를 찾을 수 없습니다.")
         return None
 
+# 텍스트 중앙 정렬해서 그림 위에 씌우기
 def draw_centered_text(draw, text, font, image_width, y_position):
     try:
         bbox = draw.textbbox((0, 0), text, font=font)
@@ -44,9 +47,10 @@ def draw_centered_text(draw, text, font, image_width, y_position):
         stroke_fill="black"
     )
 
+# 밈 생성 함수
 def create_meme(image, top_text, bottom_text):
     draw = ImageDraw.Draw(image)
-    font_size = max(int(image.width / 2), 100)  # 글자 크기 크게
+    font_size = max(int(image.width * 0.12), 80)  # 이미지 너비 기준으로 크게
 
     try:
         font = ImageFont.truetype(FONT_PATH, font_size)
@@ -57,34 +61,4 @@ def create_meme(image, top_text, bottom_text):
     draw_centered_text(draw, top_text, font, image.width, 10)
 
     try:
-        bbox = draw.textbbox((0, 0), bottom_text, font=font)
-        text_height = bbox[3] - bbox[1]
-    except AttributeError:
-        text_height = draw.textsize(bottom_text, font=font)[1]
-
-    y_bottom = image.height - text_height - 10
-    draw_centered_text(draw, bottom_text, font, image.width, y_bottom)
-
-    return image
-
-# 이미지 선택
-if uploaded_image:
-    image = Image.open(uploaded_image)
-else:
-    image = load_default_image()
-
-# 밈 생성 버튼
-if image and st.button("📸 밈 생성하기!"):
-    meme = create_meme(image.copy(), top_text, bottom_text)
-    st.image(meme, caption="🎉 생성된 밈", use_container_width=True)
-
-    buf = io.BytesIO()
-    meme.save(buf, format="PNG")
-    byte_im = buf.getvalue()
-
-    st.download_button(
-        label="💾 밈 이미지 다운로드",
-        data=byte_im,
-        file_name="meme.png",
-        mime="image/png"
-    )
+        bbox = draw.textbbox((0,
