@@ -13,29 +13,35 @@ top_text = st.text_input("상단 문구", "이게 웃긴다고?")
 bottom_text = st.text_input("하단 문구", "진짜? 😂")
 uploaded_image = st.file_uploader("짤로 쓸 이미지를 업로드하거나 기본 이미지 사용", type=["jpg", "jpeg", "png"])
 
-# 기본 이미지 경로 (같은 폴더에 sample_meme.jpg 넣어두기)
+# 기본 이미지 경로
 DEFAULT_IMAGE_PATH = "sample_meme.jpg"
 
-# 기본 이미지 불러오기 함수
+# 기본 이미지 로드 함수
 @st.cache_data
 def load_default_image():
     try:
         return Image.open(DEFAULT_IMAGE_PATH)
     except:
-        st.error("기본 이미지가 없습니다. sample_meme.jpg 파일을 프로젝트에 포함시켜 주세요.")
+        st.error("❗ sample_meme.jpg 파일이 필요합니다.")
         return None
 
-# 중앙 정렬 텍스트 삽입 함수 (textbbox 사용)
+# 텍스트 중앙 정렬 함수 (bbox 방식 사용)
 def draw_centered_text(draw, text, font, image_width, y_position):
     try:
         bbox = draw.textbbox((0, 0), text, font=font)
         text_width = bbox[2] - bbox[0]
     except AttributeError:
-        # Pillow 버전 낮은 경우 fallback
         text_width, _ = draw.textsize(text, font=font)
 
     x_position = (image_width - text_width) / 2
-    draw.text((x_position, y_position), text, font=font, fill="white", stroke_width=2, stroke_fill="black")
+    draw.text(
+        (x_position, y_position),
+        text,
+        font=font,
+        fill="white",
+        stroke_width=3,
+        stroke_fill="black"
+    )
 
 # 밈 생성 함수
 def create_meme(image, top_text, bottom_text):
@@ -43,22 +49,23 @@ def create_meme(image, top_text, bottom_text):
     font_size = int(image.width / 12)
 
     try:
-        font = ImageFont.truetype("arial.ttf", font_size)
+        font = ImageFont.truetype("NanumGothicBold.ttf", font_size)
     except:
+        st.error("❗ NanumGothicBold.ttf 파일이 누락되었습니다.")
         font = ImageFont.load_default()
 
     # 상단 텍스트
-    draw_centered_text(draw, top_text.upper(), font, image.width, 10)
+    draw_centered_text(draw, top_text, font, image.width, 10)
 
     # 하단 텍스트
     try:
-        bbox = draw.textbbox((0, 0), bottom_text.upper(), font=font)
+        bbox = draw.textbbox((0, 0), bottom_text, font=font)
         text_height = bbox[3] - bbox[1]
     except AttributeError:
-        text_height = draw.textsize(bottom_text.upper(), font=font)[1]
+        text_height = draw.textsize(bottom_text, font=font)[1]
 
     y_bottom = image.height - text_height - 10
-    draw_centered_text(draw, bottom_text.upper(), font, image.width, y_bottom)
+    draw_centered_text(draw, bottom_text, font, image.width, y_bottom)
 
     return image
 
@@ -68,12 +75,12 @@ if uploaded_image:
 else:
     image = load_default_image()
 
-# 밈 생성
+# 밈 생성 및 표시
 if image and st.button("📸 밈 생성하기!"):
     meme = create_meme(image.copy(), top_text, bottom_text)
     st.image(meme, caption="🎉 생성된 밈", use_column_width=True)
 
-    # 다운로드 링크
+    # 다운로드 처리
     buf = io.BytesIO()
     meme.save(buf, format="PNG")
     byte_im = buf.getvalue()
