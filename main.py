@@ -23,21 +23,21 @@ def load_default_image():
         st.error("❗ 기본 이미지(sample_meme.jpg)를 찾을 수 없습니다.")
         return None
 
-def draw_centered_text(draw, text, font, image_width, y_position):
+def draw_text_with_background(draw, text, font, x, y, padding=10):
+    text_width, text_height = draw.textsize(text, font=font)
+    # 텍스트 뒤에 검정 사각형 배경 그리기
+    draw.rectangle([x - padding, y - padding, x + text_width + padding, y + text_height + padding], fill="black")
+    # 텍스트 그리기
+    draw.text((x, y), text, font=font, fill="white")
+
+def draw_centered_text(draw, text, font, image_width, y_position, padding=10):
     try:
         bbox = draw.textbbox((0, 0), text, font=font)
         text_width = bbox[2] - bbox[0]
     except AttributeError:
         text_width, _ = draw.textsize(text, font=font)
     x_position = (image_width - text_width) / 2
-    draw.text(
-        (x_position, y_position),
-        text,
-        font=font,
-        fill="white",
-        stroke_width=3,
-        stroke_fill="black"
-    )
+    draw_text_with_background(draw, text, font, x_position, y_position, padding)
 
 def create_meme(image, top_text, bottom_text):
     draw = ImageDraw.Draw(image)
@@ -82,6 +82,5 @@ if image and st.button("📸 밈 생성하기!"):
         mime="image/png"
     )
 
-# 아래는 앱 실행 폴더 파일 목록 확인용(디버그용)
 if st.checkbox("🔍 앱 루트 폴더 파일 보기 (디버그용)"):
     st.write(os.listdir("."))
