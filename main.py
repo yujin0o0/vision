@@ -13,13 +13,7 @@ bottom_text = st.text_input("하단 문구", "진짜? 😂")
 uploaded_image = st.file_uploader("짤로 쓸 이미지를 업로드하거나 기본 이미지 사용", type=["jpg", "jpeg", "png"])
 
 DEFAULT_IMAGE_PATH = "sample_meme.jpg"
-
-# 작업 디렉터리와 파일 리스트 출력 (디버그용)
-st.write("현재 작업 디렉터리:", os.getcwd())
-st.write("현재 폴더 파일 목록:", os.listdir("."))
-
-# 폰트 경로 지정 (프로젝트 루트에 있다고 가정)
-FONT_PATH = os.path.join(os.getcwd(), "NanumGothicBold.ttf")
+FONT_PATH = "NanumGothicBold.ttf"  # 반드시 프로젝트 폴더에 이 폰트 파일이 있어야 합니다.
 
 @st.cache_data
 def load_default_image():
@@ -52,7 +46,7 @@ def create_meme(image, top_text, bottom_text):
     try:
         font = ImageFont.truetype(FONT_PATH, font_size)
     except OSError:
-        st.error(f"❗ 한글 폰트 파일을 찾을 수 없습니다: {FONT_PATH}")
+        st.error("❗ 한글 폰트 파일 NanumGothicBold.ttf가 없습니다. 프로젝트에 추가해주세요.")
         font = ImageFont.load_default()
 
     draw_centered_text(draw, top_text, font, image.width, 10)
@@ -87,3 +81,6 @@ if image and st.button("📸 밈 생성하기!"):
         file_name="meme.png",
         mime="image/png"
     )
+
+if st.checkbox("🔍 앱 루트 폴더 파일 보기 (디버그용)"):
+    st.write(os.listdir("."))
