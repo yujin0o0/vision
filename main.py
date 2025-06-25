@@ -41,7 +41,7 @@ def draw_centered_text(draw, text, font, image_width, y_position):
 
 def create_meme(image, top_text, bottom_text):
     draw = ImageDraw.Draw(image)
-    font_size = max(int(image.width / 4), 60)  # 훨씬 크게, 최소 60 보장
+    font_size = max(int(image.width / 2), 100)  # 훨씬 크게, 최소 100 보장
 
     try:
         font = ImageFont.truetype(FONT_PATH, font_size)
