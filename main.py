@@ -1,38 +1,34 @@
 import streamlit as st
 from PIL import Image, ImageDraw, ImageFont
 import io
+import os
 
-# 페이지 설정
 st.set_page_config(page_title="밈 생성기", page_icon="😂")
 
 st.title("😂 나만의 밈 생성기")
 st.markdown("문구를 입력하고 이미지를 선택해 나만의 짤을 만들어보세요!")
 
-# 사용자 입력
 top_text = st.text_input("상단 문구", "이게 웃긴다고?")
 bottom_text = st.text_input("하단 문구", "진짜? 😂")
 uploaded_image = st.file_uploader("짤로 쓸 이미지를 업로드하거나 기본 이미지 사용", type=["jpg", "jpeg", "png"])
 
-# 기본 이미지 경로
 DEFAULT_IMAGE_PATH = "sample_meme.jpg"
+FONT_PATH = "NanumGothicBold.ttf"  # 폰트가 앱 루트 폴더에 있다고 가정
 
-# 기본 이미지 로드 함수
 @st.cache_data
 def load_default_image():
     try:
         return Image.open(DEFAULT_IMAGE_PATH)
     except:
-        st.error("❗ sample_meme.jpg 파일이 필요합니다.")
+        st.error("❗ 기본 이미지(sample_meme.jpg)를 찾을 수 없습니다.")
         return None
 
-# 텍스트 중앙 정렬 함수 (bbox 방식 사용)
 def draw_centered_text(draw, text, font, image_width, y_position):
     try:
         bbox = draw.textbbox((0, 0), text, font=font)
         text_width = bbox[2] - bbox[0]
     except AttributeError:
         text_width, _ = draw.textsize(text, font=font)
-
     x_position = (image_width - text_width) / 2
     draw.text(
         (x_position, y_position),
@@ -43,21 +39,18 @@ def draw_centered_text(draw, text, font, image_width, y_position):
         stroke_fill="black"
     )
 
-# 밈 생성 함수
 def create_meme(image, top_text, bottom_text):
     draw = ImageDraw.Draw(image)
-    font_size = int(image.width / 12)
+    font_size = max(int(image.width / 12), 20)  # 최소 크기 20 보장
 
     try:
-        font = ImageFont.truetype("NanumGothicBold.ttf", font_size)
-    except:
-        st.error("❗ NanumGothicBold.ttf 파일이 누락되었습니다.")
+        font = ImageFont.truetype(FONT_PATH, font_size)
+    except OSError:
+        st.error("❗ 폰트 파일 NanumGothicBold.ttf가 없습니다. 업로드 확인해주세요.")
         font = ImageFont.load_default()
 
-    # 상단 텍스트
     draw_centered_text(draw, top_text, font, image.width, 10)
 
-    # 하단 텍스트
     try:
         bbox = draw.textbbox((0, 0), bottom_text, font=font)
         text_height = bbox[3] - bbox[1]
@@ -69,18 +62,15 @@ def create_meme(image, top_text, bottom_text):
 
     return image
 
-# 이미지 선택
 if uploaded_image:
     image = Image.open(uploaded_image)
 else:
     image = load_default_image()
 
-# 밈 생성 및 표시
 if image and st.button("📸 밈 생성하기!"):
     meme = create_meme(image.copy(), top_text, bottom_text)
     st.image(meme, caption="🎉 생성된 밈", use_column_width=True)
 
-    # 다운로드 처리
     buf = io.BytesIO()
     meme.save(buf, format="PNG")
     byte_im = buf.getvalue()
@@ -91,3 +81,7 @@ if image and st.button("📸 밈 생성하기!"):
         file_name="meme.png",
         mime="image/png"
     )
+
+# 아래는 앱 실행 폴더 파일 목록 확인용(디버그용)
+if st.checkbox("🔍 앱 루트 폴더 파일 보기 (디버그용)"):
+    st.write(os.listdir("."))
