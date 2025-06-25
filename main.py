@@ -61,4 +61,34 @@ def create_meme(image, top_text, bottom_text):
     draw_centered_text(draw, top_text, font, image.width, 10)
 
     try:
-        bbox = draw.textbbox((0,
+        bbox = draw.textbbox((0, 0), bottom_text, font=font)
+        text_height = bbox[3] - bbox[1]
+    except AttributeError:
+        text_height = draw.textsize(bottom_text, font=font)[1]
+
+    y_bottom = image.height - text_height - 10
+    draw_centered_text(draw, bottom_text, font, image.width, y_bottom)
+
+    return image
+
+# 이미지 선택
+if uploaded_image:
+    image = Image.open(uploaded_image)
+else:
+    image = load_default_image()
+
+# 밈 생성 및 출력
+if image and st.button("📸 밈 생성하기!"):
+    meme = create_meme(image.copy(), top_text, bottom_text)
+    st.image(meme, caption="🎉 생성된 밈", use_container_width=True)
+
+    buf = io.BytesIO()
+    meme.save(buf, format="PNG")
+    byte_im = buf.getvalue()
+
+    st.download_button(
+        label="💾 밈 이미지 다운로드",
+        data=byte_im,
+        file_name="meme.png",
+        mime="image/png"
+    )
