@@ -13,7 +13,7 @@ bottom_text = st.text_input("하단 문구", "진짜? 😂")
 uploaded_image = st.file_uploader("짤로 쓸 이미지를 업로드하거나 기본 이미지 사용", type=["jpg", "jpeg", "png"])
 
 DEFAULT_IMAGE_PATH = "sample_meme.jpg"
-FONT_PATH = "NanumGothicBold.ttf"  # 폰트가 앱 루트 폴더에 있다고 가정
+FONT_PATH = "NanumGothicBold.ttf"  # 반드시 프로젝트 폴더에 이 폰트 파일이 있어야 합니다.
 
 @st.cache_data
 def load_default_image():
@@ -41,12 +41,12 @@ def draw_centered_text(draw, text, font, image_width, y_position):
 
 def create_meme(image, top_text, bottom_text):
     draw = ImageDraw.Draw(image)
-    font_size = max(int(image.width / 2), 100)  # 훨씬 크게, 최소 100 보장
+    font_size = max(int(image.width / 2), 100)  # 글자 크게, 최소 100 보장
 
     try:
         font = ImageFont.truetype(FONT_PATH, font_size)
     except OSError:
-        st.error("❗ 폰트 파일 NanumGothicBold.ttf가 없습니다. 업로드 확인해주세요.")
+        st.error("❗ 한글 폰트 파일 NanumGothicBold.ttf가 없습니다. 프로젝트에 추가해주세요.")
         font = ImageFont.load_default()
 
     draw_centered_text(draw, top_text, font, image.width, 10)
