@@ -7,6 +7,7 @@ st.set_page_config(page_title="밈 생성기", page_icon="😂")
 
 st.title("😂 나만의 밈 생성기")
 st.markdown("문구를 입력하고 이미지를 선택해 나만의 짤을 만들어보세요!")
+st.write("📄 현재 폴더 파일 목록:", os.listdir("."))
 
 top_text = st.text_input("상단 문구", "이게 웃긴다고?")
 bottom_text = st.text_input("하단 문구", "진짜? 😂")
